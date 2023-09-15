@@ -1,7 +1,7 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -11,3 +11,5 @@ spring:
     password: dustpeo12# # mysql password
     username: root # mysql username
     url: jdbc:mysql://localhost:3306/thecp  #// ???, mysql schema name
+jwt:
+  secret: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa
