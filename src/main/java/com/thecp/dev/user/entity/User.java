@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -17,72 +18,30 @@ import java.util.stream.Collectors;
 @Builder
 @Table(name = "USERS")
 @AllArgsConstructor
-public class User implements UserDetails {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
     private Long id;
 
-    private String email; // 이메일
+    @Column(length = 100, nullable = false, unique = true)
+    private String email;
 
-    private String password; // 비밀번호
+    @Column(length = 300, nullable = false)
+    private String password;
 
-    private String nickname; // 닉네임
+    private String name;
 
-    private String imageUrl; // 프로필 이미지
+    @Column(length = 100, nullable = false, unique = true)
+    private String nickname;
 
-    private int age;
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Authority> roles = new ArrayList<>();
 
-    private String city; // 사는 도시
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    @Enumerated(EnumType.STRING)
-    private SocialType socialType; // KAKAO, NAVER, GOOGLE
-
-    private String socialId; // 로그인한 소셜 타입의 식별자 값 (일반 로그인인 경우 null)
-
-    private String refreshToken; // 리프레시 토큰
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<Role> roles = Arrays.asList(this.role);
-
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getKey()))
-                .collect(Collectors.toList());
+    public void setRoles(List<Authority> role) {
+        this.roles = role;
+        role.forEach(o -> o.setMember(this));
     }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
 }

@@ -1,15 +1,17 @@
+jwt:
+  secret: b68l1FyGcgq+wdIVM6UkOgG9CiZrkgwRvpki3frHZwo=
+
 spring:
   jpa:
     hibernate:
-      ddl-auto: none
-    show-sql: true
+      ddl-auto: create-drop
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
+
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
     password: dustpeo12# # mysql password
     username: root # mysql username
     url: jdbc:mysql://localhost:3306/thecp  #// ???, mysql schema name
-jwt:
-  secret: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa

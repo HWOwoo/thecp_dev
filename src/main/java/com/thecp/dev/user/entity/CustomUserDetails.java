@@ -1,24 +1,27 @@
 package com.thecp.dev.user.entity;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private User user;
+    private final User user;
 
-    public CustomUserDetails(User user) {
-        super();
-        this.user = user;
+    public final User getUser() {
+        return user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()));
+        return user.getRoles().stream().map(o -> new SimpleGrantedAuthority(o.getName()))
+                .collect(Collectors.toList());
+
     }
 
     @Override
@@ -50,4 +53,5 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
