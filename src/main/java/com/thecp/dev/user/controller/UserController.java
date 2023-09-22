@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     @PostMapping(value = "/login")
     public ResponseEntity<UserDto.SignResponse> signin(@RequestBody UserDto.SignRequest request) throws Exception {

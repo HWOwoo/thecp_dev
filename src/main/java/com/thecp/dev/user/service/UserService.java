@@ -8,7 +8,6 @@ import com.thecp.dev.user.repositroy.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +38,7 @@ public class UserService {
                 .nickname(user.getNickname())
                 .name(user.getName())
                 .roles(user.getRoles())
-                .token(jwtProvider.createToken(user.getEmail(), user.getRoles()))
+                .token(jwtProvider.createToken(user.getEmail(), user.getRoles(), user.getName(), user.getNickname()))
                 .build();
     }
 
@@ -56,7 +55,6 @@ public class UserService {
 
             userRepository.save(user);
         } catch (Exception e) {
-            log.error("회원가입 실패", e);
             throw new Exception("회원가입 실패");
         }
 

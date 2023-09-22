@@ -45,6 +45,7 @@ public class UserDto {
         public SignResponse(User user) {
             this.id = user.getId();
             this.nickname = user.getNickname();
+            this.name = user.getName();
             this.email = user.getEmail();
             this.roles = user.getRoles();
         }
@@ -57,6 +58,7 @@ public class UserDto {
         private String email;
         private String password;
         private String nickname;
+        private String name;
         private int age;
         private String city;
 
