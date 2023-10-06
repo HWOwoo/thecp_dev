@@ -3,6 +3,8 @@ package com.thecp.dev.user.service;
 import com.thecp.dev.jwt.JwtProvider;
 import com.thecp.dev.user.dto.UserDto;
 import com.thecp.dev.user.entity.Authority;
+import com.thecp.dev.user.entity.Role;
+import com.thecp.dev.user.entity.SocialType;
 import com.thecp.dev.user.entity.User;
 import com.thecp.dev.user.repositroy.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +34,19 @@ public class UserService {
             throw new BadCredentialsException("잘못된 비밀번호입니다.");
         }
 
+        String token = jwtProvider.createRefreshToken(); // 리프레시 토큰 생성
+
+        user.updateRefreshToken(token); // 토큰 업데이트
+
         return UserDto.SignResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
                 .name(user.getName())
+                .socialRole(user.getSocialRole())
                 .roles(user.getRoles())
-                .token(jwtProvider.createToken(user.getEmail(), user.getRoles(), user.getName(), user.getNickname()))
+                .token(jwtProvider.createToken(user.getEmail(), user.getRoles(), user.getName(), user.getNickname())) //
+                .refreshToken(token) // 리프레시 토큰
                 .build();
     }
 
@@ -49,6 +57,7 @@ public class UserService {
                     .password(passwordEncoder.encode(request.getPassword()))
                     .name(request.getName())
                     .nickname(request.getNickname())
+                    .socialRole(Role.USER) // 일반 회원가입
                     .build();
 
             user.setRoles(Collections.singletonList(Authority.builder().name("ROLE_USER").build()));

@@ -1,31 +1,31 @@
 package com.thecp.dev.jwt;
 
-import com.thecp.dev.jwt.dto.TokenInfo;
 import com.thecp.dev.user.entity.Authority;
+import com.thecp.dev.user.repositroy.UserRepository;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.buf.UEncoder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @RequiredArgsConstructor
 @Component
+@Slf4j
 public class JwtProvider {
 
     @Value("${jwt.secret}")
@@ -36,12 +36,28 @@ public class JwtProvider {
     // 만료시간 : 1Hour
     private final long exp = 1000L * 60 * 60;
 
+    // 만료시간 : 2Hour
+    private final long expRefresh = 1000L * 60 * 60 * 2;
+
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     @PostConstruct
     protected void init() {
         secretKey = Keys.hmacShaKeyFor(salt.getBytes(StandardCharsets.UTF_8));
     }
+
+    public String createRefreshToken() {
+
+        Date now = new Date();
+
+        return Jwts.builder()
+                .setExpiration(new Date(now.getTime() + expRefresh))
+                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .compact();
+    }
+    // 해당 메서드의 예상 결과값은 아래와 같다.
+    // eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGVjcCIsInJvbGVzIjpbeyJhdXRob3JpdHkiOiJST0xFX1VTRVIifV0sImlhdCI6MTYxNjQ0NjQyMCwiZXhwIjo
 
     // 토큰 생성
     public String createToken(String account, List<Authority> roles, String name, String nickname) {
@@ -49,6 +65,7 @@ public class JwtProvider {
         claims.put("roles", roles);
         claims.put("name", name);
         claims.put("nickname", nickname);
+
 
         Date now = new Date();
         return Jwts.builder()
@@ -76,6 +93,51 @@ public class JwtProvider {
         return request.getHeader("Authorization");
     }
 
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken){
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        response.setHeader("Authorization", accessToken);
+        response.setHeader("Authorization-refresh", refreshToken);
+        log.info("Access Token, Refresh Token 헤더 설정 완료");
+    }
+
+    /**
+     * AccessToken 헤더 설정
+     */
+    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
+        response.setHeader("Authorization", accessToken);
+    }
+
+    /**
+     * RefreshToken 헤더 설정
+     */
+    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
+        response.setHeader("Authorization-refresh", refreshToken);
+    }
+
+    /**
+     * AccessToken, RefreshToken 헤더 설정
+     * @param response
+     * @param accessToken
+     * @param refreshToken
+     */
+    public void setAccessAndRefreshTokenHeaders(HttpServletResponse response, String accessToken, String refreshToken) {
+        setAccessTokenHeader(response, accessToken);
+        setRefreshTokenHeader(response, refreshToken);
+        log.info("Access Token, Refresh Token 헤더 설정 완료");
+    }
+
+    /**
+     * RefreshToken DB 저장(업데이트)
+     */
+    public void updateRefreshToken(String email, String refreshToken) {
+        userRepository.findByEmail(email)
+                .ifPresentOrElse(
+                        user -> user.updateRefreshToken(refreshToken),
+                        () -> new Exception("일치하는 회원이 없습니다.")
+                );
+    }
+
     // 토큰 검증
     public boolean validateToken(String token) {
         try {
@@ -92,4 +154,6 @@ public class JwtProvider {
             return false;
         }
     }
+
+
 }

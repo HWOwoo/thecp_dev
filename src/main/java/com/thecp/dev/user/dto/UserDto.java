@@ -1,6 +1,8 @@
 package com.thecp.dev.user.dto;
 
 import com.thecp.dev.user.entity.Authority;
+import com.thecp.dev.user.entity.Role;
+import com.thecp.dev.user.entity.SocialType;
 import com.thecp.dev.user.entity.User;
 import lombok.*;
 
@@ -23,6 +25,10 @@ public class UserDto {
         private String name;
 
         private String email;
+
+        private SocialType socialType;
+
+        private Role socialRole;
     }
 
     @Getter
@@ -40,7 +46,13 @@ public class UserDto {
 
         private List<Authority> roles = new ArrayList<>();
 
+        private SocialType socialType;
+
+        private Role socialRole;
+
         private String token;
+
+        private String refreshToken;
 
         public SignResponse(User user) {
             this.id = user.getId();
@@ -48,6 +60,8 @@ public class UserDto {
             this.name = user.getName();
             this.email = user.getEmail();
             this.roles = user.getRoles();
+            this.socialRole = user.getSocialRole();
+            this.refreshToken = user.getRefreshToken();
         }
     }
 

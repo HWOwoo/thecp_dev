@@ -2,6 +2,9 @@ package com.thecp.dev.global.config;
 
 import com.thecp.dev.jwt.JwtAuthenticationFilter;
 import com.thecp.dev.jwt.JwtProvider;
+import com.thecp.dev.oauth2.OAuth2LoginFailureHandler;
+import com.thecp.dev.oauth2.OAuth2LoginSuccessHandler;
+import com.thecp.dev.oauth2.service.CustomOAuth2UserService;
 import com.thecp.dev.user.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,9 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -96,7 +102,13 @@ public class SecurityConfig {
                         response.setContentType("text/html; charset=UTF-8");
                         response.getWriter().write("인증되지 않은 사용자입니다.");
                     }
-                });
+                })
+                .and()
+                .oauth2Login()
+                .successHandler(oAuth2LoginSuccessHandler)
+                .failureHandler(oAuth2LoginFailureHandler)
+                .userInfoEndpoint().userService(customOAuth2UserService)
+        ;
 
         return http.build();
     }

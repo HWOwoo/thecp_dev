@@ -2,6 +2,11 @@ jwt:
   secret: b68l1FyGcgq+wdIVM6UkOgG9CiZrkgwRvpki3frHZwo=
 
 spring:
+  profiles:
+    group:
+      "local":
+        - "oauth"
+    active: local
   jpa:
     hibernate:
       ddl-auto: create-drop
