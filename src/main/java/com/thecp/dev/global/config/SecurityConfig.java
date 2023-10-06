@@ -12,6 +12,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -72,7 +75,7 @@ public class SecurityConfig {
                 // 조건별로 요청 허용/제한 설정
                 .authorizeRequests()
                 // 회원가입과 로그인은 모두 승인
-                .antMatchers("/api/register", "/api/login").permitAll()
+                .antMatchers("/api/register", "/api/login", "/oauth2/authorization/**").permitAll()
                 // /admin으로 시작하는 요청은 ADMIN 권한이 있는 유저에게만 허용
                 .antMatchers("/api/admin/**").hasRole("ADMIN")
                 // /user 로 시작하는 요청은 USER 권한이 있는 유저에게만 허용
@@ -117,4 +120,23 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
+/*    @Bean
+    public LoginSuccessHandler loginSuccessHandler() {
+        return new LoginSuccessHandler(jwtService, userRepository);
+    }
+    @Bean
+    public LoginFailureHandler loginFailureHandler() {
+        return new LoginFailureHandler();
+    }*/
+
+/*    @Bean
+    public AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder());
+        provider.setUserDetailsService(loginService);
+        return new ProviderManager(provider);
+    }*/
+
+
 }

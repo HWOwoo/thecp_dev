@@ -33,6 +33,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             // TODO : createToken 매개인자값 추가
             if(oAuth2User.getSocialRole() == Role.GUEST) {
                 String accessToken = jwtProvider.createToken(oAuth2User.getEmail(), null, null, null);
+
+                // TODO : 토큰값 확인, accessToken, refreshToken 모두 생성해야함
                 response.addHeader("Authorization", "Bearer " + accessToken);
                 response.sendRedirect("oauth2/sign-up"); // 프론트의 회원가입 추가 정보 입력 폼으로 리다이렉트
 
